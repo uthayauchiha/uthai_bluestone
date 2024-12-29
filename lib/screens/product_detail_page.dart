@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../models/product.dart';
+import 'package:flutter/services.dart'; // Import to change system UI style
 
 class ProductDetailPage extends StatefulWidget {
   final int productId;
@@ -20,6 +22,13 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   void initState() {
     super.initState();
     product = fetchProductDetails(widget.productId);
+
+    // Change status bar appearance here
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Colors.white, // Set the status bar to white
+      statusBarIconBrightness: Brightness.dark, // Dark icons (for good contrast)
+      statusBarBrightness: Brightness.light, // For iOS (light status bar)
+    ));
   }
 
   Future<Product> fetchProductDetails(int id) async {
@@ -35,162 +44,135 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white, // AppBar background color
+        elevation: 0, // No shadow for AppBar
+        title: Text(
+          'Product Details',
+          style: TextStyle(
+            color: Colors.deepPurple, // Text color in the AppBar
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: Colors.deepPurple, // Icon color for the back button
+          ),
+          onPressed: () {
+            Navigator.pop(context); // Back action
+          },
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(
+              isFavorite ? Icons.favorite : Icons.favorite_border,
+              color: isFavorite ? Colors.red : Colors.grey,
+            ),
+            onPressed: () {
+              setState(() {
+                isFavorite = !isFavorite;
+              });
+            },
+          ),
+        ],
+      ),
       body: FutureBuilder<Product>(
         future: product,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return Center(
+              child: SpinKitCircle(
+                color: Colors.deepPurpleAccent,
+                size: 30.0,
+              ),
+            );
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else {
             final product = snapshot.data!;
-            return Stack(
-              children: [
-                SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Image with Back and Heart Buttons
-                      _buildProductImageCard(product.image),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(height: 20),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  '\$${product.price}',
-                                  style: TextStyle(
-                                    fontSize: 22,
-                                    fontFamily: 'Merriweather',
-                                    color: Colors.deepPurple,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                Text(
-                                  'Rating: ${product.rating.toString()} ⭐',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontFamily: 'Merriweather',
-                                    color: Colors.deepPurple,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Text(
-                              product.title,
-                              style: TextStyle(
-                                fontFamily: 'Merriweather',
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
-                            ),
-                            SizedBox(height: 10),
-                            Row(
-                              children: [
-                                Text(
-                                  "Category :",
-                                  style: TextStyle(
-                                    fontFamily: 'Merriweather',
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black87,
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 8.0),
-                                  child: Text(
-                                    product.category.toUpperCase(),
-                                    style: TextStyle(
-                                      fontFamily: 'Merriweather',
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.deepPurpleAccent,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 10),
-                            Text(
-                              product.description,
-                              style: TextStyle(
-                                  fontSize: 14, color: Colors.black54),
-                            ),
-                            SizedBox(height: 20),
-                            Center(child: _buildActionButton()),
-                          ],
+            return SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildProductImageCard(product.image),
+                    SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '\$${product.price}',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontFamily: 'Merriweather',
+                            color: Colors.deepPurple,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                Positioned(
-                  top: 20,
-                  left: 20,
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                    child: Container(
-                      padding: EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            spreadRadius: 2,
-                            blurRadius: 5,
-                            offset: Offset(0, 3),
+                        Text(
+                          'Rating: ${product.rating.toString()} ⭐',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontFamily: 'Merriweather',
+                            color: Colors.deepPurple,
+                            fontWeight: FontWeight.w600,
                           ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.arrow_back,
-                        color: Color.fromARGB(255, 95, 6, 6),
-                        size: 30,
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      product.title,
+                      style: TextStyle(
+                        fontFamily: 'Merriweather',
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
                       ),
                     ),
-                  ),
-                ),
-                Positioned(
-                  top: 20,
-                  right: 20,
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        isFavorite = !isFavorite;
-                      });
-                    },
-                    child: Container(
-                      padding: EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            spreadRadius: 2,
-                            blurRadius: 5,
-                            offset: Offset(0, 3),
+                    SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Text(
+                          "Category :",
+                          style: TextStyle(
+                            fontFamily: 'Merriweather',
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
                           ),
-                        ],
-                      ),
-                      child: Icon(
-                        isFavorite ? Icons.favorite : Icons.favorite_border,
-                        color: isFavorite ? Colors.red : Colors.grey,
-                        size: 30,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: Text(
+                            product.category.toUpperCase(),
+                            style: TextStyle(
+                              fontFamily: 'Merriweather',
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.deepPurpleAccent,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      product.description,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.black54,
                       ),
                     ),
-                  ),
+                    SizedBox(height: 20),
+                    Center(child: _buildActionButton()),
+                    SizedBox(height: 40),
+                  ],
                 ),
-              ],
+              ),
             );
           }
         },
@@ -205,7 +187,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         child: Image.network(
           imageUrl,
           fit: BoxFit.cover,
-          height: 400,
+          height: 300,
           width: double.infinity,
           loadingBuilder: (context, child, loadingProgress) {
             if (loadingProgress == null) return child;

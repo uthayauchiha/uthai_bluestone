@@ -40,27 +40,47 @@ class _ProductListPageState extends State<ProductListPage> {
     }
   }
 
+  // Fetch products from API
   Future<void> fetchProducts() async {
-    if (isLoading || isOffline)
-      return; // Don't fetch if already loading or offline
+    if (isLoading || isOffline) return; // Don't fetch if already loading or offline
     setState(() {
       isLoading = true;
       errorMessage = ''; // Clear any previous error messages
     });
 
-    final response = await http.get(Uri.parse(
-        'https://fakestoreapi.com/products?limit=10&page=$currentPage'));
+    final url = 'https://fakestoreapi.com/products?limit=10&page=$currentPage';
 
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
-      setState(() {
-        products.addAll(data.map((item) => Product.fromJson(item)).toList());
-        currentPage++;
-        isLoading = false;
-        hasMore = data.length ==
-            10; // Only allow loading more if 10 items were returned
-      });
-    } else {
+    try {
+      final response = await http.get(Uri.parse(url));
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+
+        if (data.isNotEmpty) {
+          setState(() {
+            products.addAll(data.map((item) => Product.fromJson(item)).toList());
+            currentPage++;
+            isLoading = false;
+            hasMore = data.length == 10; // Only allow loading more if 10 items were returned
+          });
+        } else {
+          setState(() {
+            isLoading = false;
+            errorMessage = 'No products found.';
+          });
+        }
+      } else {
+        setState(() {
+          isLoading = false;
+          errorMessage = 'Failed to load products. Please try again later.';
+          isOffline = true; // Mark as offline if request fails
+        });
+      }
+    } catch (e) {
+      print('Error: $e');
       setState(() {
         isLoading = false;
         errorMessage = 'Failed to load products. Please try again later.';
@@ -154,16 +174,15 @@ class _ProductListPageState extends State<ProductListPage> {
                         itemBuilder: (context, index) {
                           if (index == products.length) {
                             if (isLoading) {
-                              // return Padding(
-                              //   padding: const EdgeInsets.all(16.0),
-                              //   child: SpinKitCircle(
-                              //     color: Color.fromARGB(255, 34, 173, 126),
-                              //     size: 50.0,
-                              //   ),
-                              // );
+                              return Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: SpinKitCircle(
+                                  color: Colors.transparent,
+                                  size: 50.0,
+                                ),
+                              );
                             }
-                            return SizedBox
-                                .shrink(); // Placeholder for no more data
+                            return SizedBox.shrink(); // Placeholder for no more data
                           }
 
                           final product = products[index];
@@ -173,7 +192,7 @@ class _ProductListPageState extends State<ProductListPage> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             color: Colors.white,
-                            shadowColor: Colors.deepPurple.withOpacity(0.3),
+                            shadowColor: Colors.transparent.withOpacity(0.3),
                             child: InkWell(
                               onTap: () {
                                 Navigator.push(
@@ -186,8 +205,7 @@ class _ProductListPageState extends State<ProductListPage> {
                               },
                               borderRadius: BorderRadius.circular(8),
                               child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 4),
+                                padding: const EdgeInsets.symmetric(horizontal: 4),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -209,8 +227,7 @@ class _ProductListPageState extends State<ProductListPage> {
                                                   return child;
                                                 return Center(
                                                   child: SpinKitCircle(
-                                                    color:
-                                                        Colors.deepPurpleAccent,
+                                                    color: Colors.deepPurpleAccent,
                                                     size: 30.0,
                                                   ),
                                                 );
