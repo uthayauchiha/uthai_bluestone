@@ -91,6 +91,32 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                               ),
                             ),
                             SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Text(
+                                  "Category :",
+                                  style: TextStyle(
+                                    fontFamily: 'Merriweather',
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 8.0),
+                                  child: Text(
+                                    product.category.toUpperCase(),
+                                    style: TextStyle(
+                                      fontFamily: 'Merriweather',
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.deepPurpleAccent,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 10),
                             Text(
                               product.description,
                               style: TextStyle(
@@ -115,13 +141,13 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       padding: EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white, 
+                        color: Colors.white,
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.2),
                             spreadRadius: 2,
                             blurRadius: 5,
-                            offset: Offset(0, 3), 
+                            offset: Offset(0, 3),
                           ),
                         ],
                       ),
@@ -158,10 +184,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       ),
                       child: Icon(
                         isFavorite ? Icons.favorite : Icons.favorite_border,
-                        color: isFavorite
-                            ? Colors.red
-                            : Colors
-                                .grey, 
+                        color: isFavorite ? Colors.red : Colors.grey,
                         size: 30,
                       ),
                     ),
@@ -177,9 +200,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
   Widget _buildProductImageCard(String imageUrl) {
     return Card(
-      elevation: 4.0, 
+      elevation: 4.0,
       child: ClipRRect(
-        
         child: Image.network(
           imageUrl,
           fit: BoxFit.cover,
@@ -212,7 +234,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           print('Product added to cart');
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.deepPurpleAccent, 
+          backgroundColor: Colors.deepPurpleAccent,
           padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
@@ -223,15 +245,14 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           ),
         ),
         child: Row(
-          mainAxisAlignment:
-              MainAxisAlignment.center, 
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.shopping_cart, 
-              color: Colors.white, 
-              size: 24, 
+              Icons.shopping_cart,
+              color: Colors.white,
+              size: 24,
             ),
-            SizedBox(width: 8), 
+            SizedBox(width: 8),
             Text(
               'Add to Cart',
               style: TextStyle(color: Colors.white),
